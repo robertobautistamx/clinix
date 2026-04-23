@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DoctorsModule } from './modules/doctors/doctors.module';
@@ -14,6 +16,23 @@ import { TransactionDetailsModule } from './modules/transaction_details/transact
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+  imports: [ConfigModule],
+  inject: [ConfigService],
+  useFactory: (config: ConfigService) => {
+    return {
+      type: 'mysql',
+      host: config.get<string>('DB_HOST', 'localhost'),
+      port: parseInt(config.get<string>('DB_PORT') || '3307', 10),
+      username: config.get<string>('DB_USERNAME', 'root'),
+      password: config.get<string>('DB_PASSWORD', 'yg5dgM@n'),
+      database: config.get<string>('DB_DATABASE', 'medical_db'),
+      autoLoadEntities: true,
+      synchronize: false,
+    };
+  },
+}),
     DoctorsModule,
     PatientsModule,
     HospitalsModule,

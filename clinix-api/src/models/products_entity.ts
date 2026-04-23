@@ -33,7 +33,7 @@ export class ProductsEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
   cost_price!: number;
 
-  @Column({ type: 'enum', enum: ['RX', 'OTC'], default: () => "'RX'", nullable: false })
+  @Column({ type: 'enum', enum: ['RX', 'OTC'], default:'RX', nullable: false })
   requires_rx!: 'RX' | 'OTC';
 
   @Column({ type: 'int', default: () => '0', nullable: false })

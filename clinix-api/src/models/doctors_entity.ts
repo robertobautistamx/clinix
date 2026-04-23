@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, Index, Unique, ManyToOne, JoinColumn } from 'typeorm';
+import { HospitalsEntity } from './hospitals_entity';
 
 @Entity('doctors')
 @Unique('uq_cedula', ['cedula'])
@@ -39,8 +40,7 @@ export class DoctorsEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', nullable: false })
   created_at!: Date;
 
-  // Relaciones
-  // @ManyToOne(() => HospitalsEntity, { onDelete: 'RESTRICT', onUpdate: 'CASCADE' })
-  // @JoinColumn({ name: 'hospital_id', referencedColumnName: 'hospital_id', foreignKeyConstraintName: 'fk_doctors_hospital' })
-  // hospital: HospitalsEntity;
+  @ManyToOne(() => HospitalsEntity, { onDelete: 'RESTRICT', onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'hospital_id', referencedColumnName: 'hospital_id', foreignKeyConstraintName: 'fk_doctors_hospital' })
+  hospital!: HospitalsEntity;
 }
