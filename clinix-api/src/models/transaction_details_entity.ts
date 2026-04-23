@@ -1,4 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, JoinColumn } from 'typeorm';
+import { TransactionsEntity } from './transactions_entity';
+import { ProductsEntity } from './products_entity';
 
 @Entity('transaction_details')
 @Index('transaction_id', ['transaction_id'])
@@ -23,5 +25,11 @@ export class TransactionDetailsEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   subtotal?: number;
 
-  // Relaciones con entidades Transactions y Products pueden agregarse aquí usando @ManyToOne y @JoinColumn
+  @ManyToOne(() => TransactionsEntity, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'transaction_id', referencedColumnName: 'transaction_id', foreignKeyConstraintName: 'fk_detail_transaction' })
+  transaction!: TransactionsEntity;
+
+  @ManyToOne(() => ProductsEntity, { onDelete: 'RESTRICT', onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'product_id', referencedColumnName: 'product_id', foreignKeyConstraintName: 'fk_detail_product' })
+  product!: ProductsEntity;
 }

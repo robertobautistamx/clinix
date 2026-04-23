@@ -1,4 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, Index, Unique } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index, Unique, ManyToOne, JoinColumn } from 'typeorm';
+import { PatientsEntity } from './patients_entity';
+import { DoctorsEntity } from './doctors_entity';
+import { HospitalsEntity } from './hospitals_entity';
+import { ProductsEntity } from './products_entity';
+import { Icd10DiagnosesEntity } from './icd10_diagnoses_entity';
 
 @Entity('transactions')
 @Unique('uq_tx_code', ['transaction_code'])
@@ -84,5 +89,23 @@ export class TransactionsEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', nullable: false })
   created_at!: Date;
 
-  // Relaciones con otras entidades pueden agregarse aquí usando @ManyToOne y @JoinColumn
+  @ManyToOne(() => PatientsEntity, { onDelete: 'RESTRICT', onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'patient_id', referencedColumnName: 'patient_id', foreignKeyConstraintName: 'fk_tx_patient' })
+  patient!: PatientsEntity;
+
+  @ManyToOne(() => DoctorsEntity, { onDelete: 'RESTRICT', onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'doctor_id', referencedColumnName: 'doctor_id', foreignKeyConstraintName: 'fk_tx_doctor' })
+  doctor!: DoctorsEntity;
+
+  @ManyToOne(() => HospitalsEntity, { onDelete: 'RESTRICT', onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'hospital_id', referencedColumnName: 'hospital_id', foreignKeyConstraintName: 'fk_tx_hospital' })
+  hospital!: HospitalsEntity;
+
+  @ManyToOne(() => ProductsEntity, { onDelete: 'RESTRICT', onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'product_id', referencedColumnName: 'product_id', foreignKeyConstraintName: 'fk_tx_product' })
+  product!: ProductsEntity;
+
+  @ManyToOne(() => Icd10DiagnosesEntity, { onDelete: 'RESTRICT', onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'diagnosis_id', referencedColumnName: 'diagnosis_id', foreignKeyConstraintName: 'fk_tx_diagnosis_tx' })
+  diagnosis!: Icd10DiagnosesEntity;
 }
