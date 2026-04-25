@@ -10,9 +10,14 @@ export class DoctorsService {
     private readonly doctorRepository: Repository<DoctorsEntity>,
   ) {}
 
-  findAll() {
-    return this.doctorRepository.find({ relations: ['hospital'] });
-  }
+ async findAll({ page, limit }: { page: number; limit: number }) {
+  const [data, total] = await this.doctorRepository.findAndCount({
+    take: limit,
+    skip: (page - 1) * limit,
+    order: { doctor_id: 'DESC' },
+  });
+  return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+}
 
   findOne(id: number) {
     return this.doctorRepository.findOne({ where: { doctor_id: id }, relations: ['hospital'] });

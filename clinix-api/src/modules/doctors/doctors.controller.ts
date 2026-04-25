@@ -1,15 +1,17 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
 import { DoctorsService } from './doctors.service';
 
 @Controller('doctors')
 export class DoctorsController {
   constructor(private readonly doctorsService: DoctorsService) {}
 
-  @Get()
-  findAll() {
-    return this.doctorsService.findAll();
-  }
-
+ @Get()
+findAll(
+  @Query('page') page = 1,
+  @Query('limit') limit = 50,
+) {
+  return this.doctorsService.findAll({ page: +page, limit: +limit });
+}
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.doctorsService.findOne(Number(id));
