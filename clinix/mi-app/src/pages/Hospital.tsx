@@ -1,0 +1,70 @@
+// ══════════════════════════════════════════════════════
+//  pages/Hospital.tsx
+// ══════════════════════════════════════════════════════
+
+import { useState } from 'react';
+import { useFetch } from '../hooks/useFetch';
+import { hospitalesService, Hospital as HospitalType } from '../services/api';
+import Paginacion from '../components/Paginacion';
+
+function irHospital(query: string) {
+  const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+export default function Hospital() {
+  const [page, setPage] = useState(1);
+  const { data, loading, error } = useFetch(() =>
+    hospitalesService.getPaginated({ page, limit: 50 })
+  , [page]);
+
+  const resData: any = data;
+  let lista: HospitalType[] = Array.isArray(resData) ? resData : (resData?.data ?? resData?.items ?? []);
+  let totalPaginas = resData?.totalPages ?? (resData?.total ? Math.ceil(resData.total / 50) : 1);
+
+  if (Array.isArray(resData)) {
+    totalPaginas = Math.ceil(lista.length / 50) || 1;
+    lista = lista.slice((page - 1) * 50, page * 50);
+  }
+
+  return (
+    <section>
+      <h2><b>Hospitales Cercanos</b></h2>
+      <p className="hospital-subtitulo">Selecciona un hospital para obtener cómo llegar</p>
+
+      {loading && <p>Cargando hospitales...</p>}
+      {error   && <p className="error-txt">⚠️ {error}</p>}
+
+      {!loading && !error && (
+        <div className="hospitales-grid">
+          {lista.length === 0 && <p>No hay hospitales registrados.</p>}
+          {lista.map((h) => (
+            <div key={h.hospital_id} className="card-hosp" onClick={() => irHospital(`${h.name}, ${h.city || ''}, ${h.state || ''}`)}>
+              <div className="card-hosp-img" style={{ background: 'linear-gradient(135deg,#3a7bd5,#5a9bf5)' }}>
+                <span className="card-hosp-badge" style={{ background: 'rgba(255,255,255,0.92)', color: '#3a7bd5' }}>
+                  🏥 Hospital
+                </span>
+              </div>
+              <div className="card-hosp-info">
+                <h3>{h.name}</h3>
+                <p className="card-hosp-location">📍 {h.city || 'Ciudad no especificada'}{h.state ? `, ${h.state}` : ''}</p>
+                <p className="card-hosp-tipo">{h.address || 'Dirección no especificada'}</p>
+                <div className="card-hosp-footer">
+                  {h.phone && <span style={{ fontSize: '0.85em', color: '#7a94a8' }}>📞 {h.phone}</span>}
+                  <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span className="card-hosp-maps">🗺️ Cómo llegar</span>
+                    <span className="card-hosp-arrow">→</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && !error && lista.length > 0 && (
+        <Paginacion paginaActual={page} totalPaginas={totalPaginas} cambiarPagina={setPage} />
+      )}
+    </section>
+  );
+}
