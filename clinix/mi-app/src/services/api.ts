@@ -134,3 +134,22 @@ export const transaccionesService = {
 export const sintomasService = {
   getAll: () => request<{ symptom_id: number; name: string; zone?: string }[]>('/symptoms-catalog'),
 };
+
+// ── Recomendaciones (Algoritmo Apriori) ───────────────
+export interface RecomendacionApriori {
+  base_id: number;
+  producto_base: string;
+  recomendado_id: number;
+  producto_recomendado: string;
+  probabilidad: number;
+  veces_juntos: number;
+  icono: string;
+}
+
+export const recomendacionesService = {
+  getAll: () => request<{ data: RecomendacionApriori[]; total: number }>('/recommendations'),
+  getApriori: (minSupport: number = 2) =>
+    request<{ data: any[]; total: number }>(`/recommendations/apriori?minSupport=${minSupport}`),
+  getForProduct: (productId: number) =>
+    request<{ data: any[]; total: number }>(`/recommendations/product/${productId}`),
+};

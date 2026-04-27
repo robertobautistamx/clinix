@@ -13,6 +13,7 @@ import { MedicalRecordsModule } from './modules/medical_records/medical_records.
 import { ProductsModule } from './modules/products/products.module';
 import { SymptomsCatalogModule } from './modules/symptoms_catalog/symptoms_catalog.module';
 import { TransactionDetailsModule } from './modules/transaction_details/transaction_details.module';
+import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { TransactionDetailsModule } from './modules/transaction_details/transact
     ProductsModule,
     SymptomsCatalogModule,
     TransactionDetailsModule,
+    RecommendationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
