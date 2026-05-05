@@ -1,6 +1,7 @@
 // ── Tipo para crear transacción nueva ────────────────
 export interface TransaccionNueva {
   total: number;
+  total_amount?: number;
   patient_id?: number;
   doctor_id?: number;
   hospital_id: number;
@@ -8,6 +9,18 @@ export interface TransaccionNueva {
   diagnosis_id: number;
   quantity: number;
   unit_price: number;
+  discount_pct?: number;
+  discount_amount?: number;
+  subtotal?: number;
+  tax_pct?: number;
+  tax_amount?: number;
+  currency?: string;
+  payment_method?: string;
+  insurance_covered?: number;
+  patient_paid?: number;
+  status?: string;
+  transaction_type?: string;
+  transaction_date?: string;
   transaction_code: string;
 }
 // ══════════════════════════════════════════════════════
@@ -74,6 +87,12 @@ export interface Hospital {
   phone?: string;
 }
 
+export interface DiagnosticoIcd10 {
+  diagnosis_id: number;
+  code?: string;
+  description?: string;
+}
+
 export interface Producto {
   product_id: number;
   name: string;
@@ -125,6 +144,11 @@ export const hospitalesService = {
   getAll: () => request<Hospital[]>('/hospitals'),
   getPaginated: (p: PaginaParams) => request<Paginated<Hospital>>(`/hospitals${qs(p)}`),
   getById: (id: number) => request<Hospital>(`/hospitals/${id}`),
+};
+
+export const diagnosticosService = {
+  getAll: () => request<DiagnosticoIcd10[]>('/icd10-diagnoses'),
+  getById: (id: number) => request<DiagnosticoIcd10>(`/icd10-diagnoses/${id}`),
 };
 
 

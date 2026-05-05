@@ -4,6 +4,8 @@ import { useFetch } from '../hooks/useFetch';
 import { pacientesService, Paciente } from '../services/api';
 import Modal from '../components/Modal';
 import Paginacion from '../components/Paginacion';
+import Loader from '../components/Loader';
+import SearchBar from '../components/SearchBar';
 
 interface FormPaciente {
   first_name: string; last_name: string; curp: string; birth_date: string;
@@ -35,6 +37,7 @@ export default function Pacientes() {
   const [form, setForm] = useState<FormPaciente>(FORM_INICIAL);
   const [guardando, setGuardando] = useState(false);
   const [formError, setFormError] = useState('');
+  const [busqueda, setBusqueda] = useState('');
 
   function abrirModal() { setForm(FORM_INICIAL); setFormError(''); setModalAbierto(true); }
   function cerrarModal() { setModalAbierto(false); }
@@ -90,6 +93,12 @@ export default function Pacientes() {
     lista = lista.slice((page - 1) * 50, page * 50);
   }
 
+  const listaFiltrada = lista.filter((pac) => {
+    if (!busqueda) return true;
+    const texto = `${pac.first_name} ${pac.last_name} ${pac.curp} ${pac.city ?? ''} ${pac.phone ?? ''}`.toLowerCase();
+    return texto.includes(busqueda.toLowerCase());
+  });
+
   return (
     <section>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -100,13 +109,23 @@ export default function Pacientes() {
             <button className="btn-primary btn-primary--green" onClick={abrirModal}><Plus size={14} style={{ marginRight: 8 }} />Agregar Paciente</button>
           </div>
 
-      {loading && <p>Cargando pacientes...</p>}
+      <SearchBar
+        value={busqueda}
+        onChange={setBusqueda}
+        placeholder="Buscar por nombre, CURP o ciudad..."
+      />
+
+      {loading && (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
+          <Loader />
+        </div>
+      )}
       {error   && <p className="error-txt">{error}</p>}
 
       {!loading && !error && (
         <div className="hospitales-grid">
-          {lista.length === 0 && <p>No hay pacientes registrados.</p>}
-          {lista.map((pac) => (
+          {listaFiltrada.length === 0 && <p>No hay pacientes que coincidan con la búsqueda.</p>}
+          {listaFiltrada.map((pac) => (
             <div key={pac.patient_id} className="card-hosp">
               <div className="card-hosp-img" style={{
                 background: 'linear-gradient(135deg,#27ae60,#2ecc71)',
@@ -133,7 +152,7 @@ export default function Pacientes() {
         </div>
       )}
 
-      {!loading && !error && lista.length > 0 && (
+      {!loading && !error && listaFiltrada.length > 0 && (
         <Paginacion paginaActual={page} totalPaginas={totalPaginas} cambiarPagina={setPage} />
       )}
 

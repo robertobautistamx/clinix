@@ -8,6 +8,8 @@ import { useFetch } from '../hooks/useFetch';
 import { doctoresService, Doctor } from '../services/api';
 import Modal from '../components/Modal';
 import Paginacion from '../components/Paginacion';
+import Loader from '../components/Loader';
+import SearchBar from '../components/SearchBar';
 
 const ESPECIALIDADES = [
   'Medicina General','Cardiología','Neurología','Gastroenterología',
@@ -41,6 +43,7 @@ export default function Doctores() {
   const [form, setForm] = useState<FormDoctor>(FORM_INICIAL);
   const [guardando, setGuardando] = useState(false);
   const [formError, setFormError] = useState('');
+  const [busqueda, setBusqueda] = useState('');
 
   function abrirModal() { setForm(FORM_INICIAL); setFormError(''); setModalAbierto(true); }
   function cerrarModal() { setModalAbierto(false); }
@@ -87,6 +90,12 @@ export default function Doctores() {
     lista = lista.slice((page - 1) * 50, page * 50);
   }
 
+  const listaFiltrada = lista.filter((doc) => {
+    if (!busqueda) return true;
+    const texto = `${doc.first_name} ${doc.last_name} ${doc.specialty} ${doc.cedula} ${doc.phone ?? ''}`.toLowerCase();
+    return texto.includes(busqueda.toLowerCase());
+  });
+
   return (
     <section>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -97,13 +106,23 @@ export default function Doctores() {
             <button className="btn-primary" onClick={abrirModal}><Plus size={14} style={{ marginRight: 8 }} />Agregar Doctor</button>
           </div>
 
-      {loading && <p>Cargando doctores...</p>}
+      <SearchBar
+        value={busqueda}
+        onChange={setBusqueda}
+        placeholder="Buscar por nombre, especialidad o cédula..."
+      />
+
+      {loading && (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
+          <Loader />
+        </div>
+      )}
       {error   && <p className="error-txt">{error}</p>}
 
       {!loading && !error && (
         <div className="hospitales-grid">
-          {lista.length === 0 && <p>No hay doctores registrados.</p>}
-          {lista.map((doc) => (
+          {listaFiltrada.length === 0 && <p>No hay doctores que coincidan con la búsqueda.</p>}
+          {listaFiltrada.map((doc) => (
             <div key={doc.doctor_id} className="card-hosp">
               <div className="card-hosp-img card-doctor-img-bg">{<Stethoscope size={48} />}</div>
               <div className="card-hosp-info">
@@ -124,7 +143,7 @@ export default function Doctores() {
         </div>
       )}
 
-      {!loading && !error && lista.length > 0 && (
+      {!loading && !error && listaFiltrada.length > 0 && (
         <Paginacion paginaActual={page} totalPaginas={totalPaginas} cambiarPagina={setPage} />
       )}
 
