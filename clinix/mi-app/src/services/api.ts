@@ -1,3 +1,15 @@
+// ── Tipo para crear transacción nueva ────────────────
+export interface TransaccionNueva {
+  total: number;
+  patient_id?: number;
+  doctor_id?: number;
+  hospital_id: number;
+  product_id: number;
+  diagnosis_id: number;
+  quantity: number;
+  unit_price: number;
+  transaction_code: string;
+}
 // ══════════════════════════════════════════════════════
 //  services/api.ts  —  Clinix API (NestJS backend)
 //  Cambia BASE_URL en tu .env: REACT_APP_API_URL=http://localhost:3000
@@ -17,7 +29,6 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-// ── Tipos base ────────────────────────────────────────
 export interface Doctor {
   doctor_id: number;
   cedula: string;
@@ -79,7 +90,6 @@ export interface Transaccion {
   patient_id?: number;
 }
 
-// ── Tipos paginación ──────────────────────────────────
 export interface Paginated<T> {
   data: T[];
   total: number;
@@ -91,7 +101,6 @@ export interface Paginated<T> {
 interface PaginaParams { page: number; limit: number }
 const qs = ({ page, limit }: PaginaParams) => `?page=${page}&limit=${limit}`;
 
-// ── Servicios ─────────────────────────────────────────
 export const doctoresService = {
   getPaginated: (p: PaginaParams) => request<Paginated<Doctor>>(`/doctors${qs(p)}`),
   getById: (id: number) => request<Doctor>(`/doctors/${id}`),
@@ -127,7 +136,7 @@ export const productosService = {
 export const transaccionesService = {
   getPaginated: (p: PaginaParams) => request<Paginated<Transaccion>>(`/transactions${qs(p)}`),
   getById: (id: number) => request<Transaccion>(`/transactions/${id}`),
-  create: (data: Omit<Transaccion, 'transaction_id' | 'created_at'>) =>
+  create: (data: TransaccionNueva) =>
     request<Transaccion>('/transactions', { method: 'POST', body: JSON.stringify(data) }),
 };
 

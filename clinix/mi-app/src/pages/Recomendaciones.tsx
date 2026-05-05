@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import { recomendacionesService, RecomendacionApriori } from '../services/api';
+import { Bot, Package } from 'lucide-react';
 
 function colorProbabilidad(p: number): string {
   if (p >= 80) return '#27ae60';
@@ -23,9 +24,14 @@ export default function Recomendaciones() {
       try {
         setLoading(true);
         setError(null);
-        const res = await recomendacionesService.getAll();
+        const res: any = await recomendacionesService.getAll();
+        
+        // LOG para ver qué responde exactamente el backend
+        console.log('Respuesta de recomendaciones desde el API:', res);
+
         if (!cancelled) {
-          setRecomendaciones(res.data || []);
+          const lista = Array.isArray(res) ? res : (res.data ?? res.items ?? res.recomendaciones ?? []);
+          setRecomendaciones(lista);
         }
       } catch (err: any) {
         if (!cancelled) {
@@ -82,13 +88,13 @@ export default function Recomendaciones() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3.5em',
                 }}
               >
-                {rec.icono}
+                <Package size={48} color="white" />
               </div>
               <div className="card-hosp-info">
                 <p className="card-hosp-tipo" style={{ marginBottom: 4 }}>Si compras</p>
                 <h3>{rec.producto_base}</h3>
                 <p className="card-hosp-location">
-                  🤖 Te recomendamos: <b>{rec.producto_recomendado}</b>
+                  <Bot size={18} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Te recomendamos: <b>{rec.producto_recomendado}</b>
                 </p>
                 <p style={{ fontSize: '0.85em', color: '#666', marginTop: 4 }}>
                   Comprado junto {rec.veces_juntos} {rec.veces_juntos === 1 ? 'vez' : 'veces'}
