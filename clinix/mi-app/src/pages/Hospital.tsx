@@ -2,10 +2,11 @@
 //  pages/Hospital.tsx
 // ══════════════════════════════════════════════════════
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useFetch } from '../hooks/useFetch';
 import { hospitalesService, Hospital as HospitalType } from '../services/api';
 import Paginacion from '../components/Paginacion';
+import { Hospital as HospitalIcon, MapPin, Phone, Map } from 'lucide-react';
 
 function irHospital(query: string) {
   const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
@@ -33,7 +34,7 @@ export default function Hospital() {
       <p className="hospital-subtitulo">Selecciona un hospital para obtener cómo llegar</p>
 
       {loading && <p>Cargando hospitales...</p>}
-      {error   && <p className="error-txt">⚠️ {error}</p>}
+      {error   && <p className="error-txt">{error}</p>}
 
       {!loading && !error && (
         <div className="hospitales-grid">
@@ -42,17 +43,17 @@ export default function Hospital() {
             <div key={h.hospital_id} className="card-hosp" onClick={() => irHospital(`${h.name}, ${h.city || ''}, ${h.state || ''}`)}>
               <div className="card-hosp-img" style={{ background: 'linear-gradient(135deg,#3a7bd5,#5a9bf5)' }}>
                 <span className="card-hosp-badge" style={{ background: 'rgba(255,255,255,0.92)', color: '#3a7bd5' }}>
-                  🏥 Hospital
+                  {React.createElement(HospitalIcon, { size: 14, style: { marginRight: 8 } })} Hospital
                 </span>
               </div>
               <div className="card-hosp-info">
                 <h3>{h.name}</h3>
-                <p className="card-hosp-location">📍 {h.city || 'Ciudad no especificada'}{h.state ? `, ${h.state}` : ''}</p>
+                <p className="card-hosp-location"><MapPin size={12} style={{ marginRight: 8 }} />{h.city || 'Ciudad no especificada'}{h.state ? `, ${h.state}` : ''}</p>
                 <p className="card-hosp-tipo">{h.address || 'Dirección no especificada'}</p>
                 <div className="card-hosp-footer">
-                  {h.phone && <span style={{ fontSize: '0.85em', color: '#7a94a8' }}>📞 {h.phone}</span>}
+                  {h.phone && <span style={{ fontSize: '0.85em', color: '#7a94a8' }}><Phone size={12} style={{ marginRight: 8 }} />{h.phone}</span>}
                   <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span className="card-hosp-maps">🗺️ Cómo llegar</span>
+                    <span className="card-hosp-maps">{React.createElement(Map, { size: 14, style: { marginRight: 8 } })} Cómo llegar</span>
                     <span className="card-hosp-arrow">→</span>
                   </div>
                 </div>

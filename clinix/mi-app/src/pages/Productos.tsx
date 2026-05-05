@@ -6,6 +6,7 @@ import { useFetch } from '../hooks/useFetch';
 import { productosService, Producto } from '../services/api';
 import { useCarrito } from '../context/CarritoContext';
 import { useState } from 'react';
+import { Pill, Check, ShoppingCart, AlertTriangle } from 'lucide-react';
 import Paginacion from '../components/Paginacion';
 
 export default function Productos() {
@@ -35,7 +36,7 @@ export default function Productos() {
       <p className="hospital-subtitulo">Agrega medicamentos a tu carrito</p>
 
       {loading && <p>Cargando productos...</p>}
-      {error   && <p className="error-txt">⚠️ {error}</p>}
+      {error   && <p className="error-txt">{error}</p>}
 
       {!loading && !error && (
         <div className="hospitales-grid">
@@ -54,7 +55,7 @@ export default function Productos() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3.5em',
                   }}
                 >
-                  💊
+                  <Pill size={48} />
                   {stock === 0 && (
                     <span className="card-hosp-badge" style={{ background: '#e74c3c', color: '#fff' }}>
                       Sin stock
@@ -74,7 +75,7 @@ export default function Productos() {
                   </p>
                   {stock != null && (
                     <p style={{ fontSize: '0.78em', color: stock > 0 ? '#27ae60' : '#e74c3c' }}>
-                      {stock > 0 ? `📦 Stock: ${stock}` : '⚠️ Sin stock'}
+                      {stock > 0 ? `Stock: ${stock}` : 'Sin stock'}
                     </p>
                   )}
                   <div className="card-hosp-footer" style={{ marginTop: 10 }}>
@@ -83,7 +84,7 @@ export default function Productos() {
                       disabled={stock === 0}
                       onClick={() => agregar(prod)}
                     >
-                      {enCarrito(prod.product_id) ? '✅ Agregado' : '🛒 Agregar'}
+                      {enCarrito(prod.product_id) ? <><Check size={14} style={{ marginRight: 8 }} />Agregado</> : <><ShoppingCart size={14} style={{ marginRight: 8 }} />Agregar</>}
                     </button>
                   </div>
                 </div>

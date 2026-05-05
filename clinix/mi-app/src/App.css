@@ -247,7 +247,7 @@ main { flex: 1; padding: 30px; overflow-y: auto; }
   background: linear-gradient(135deg, #3a7bd5 0%, #8e44ad 100%) !important;
   display: flex; align-items: center; justify-content: center; font-size: 4em;
 }
-.card-doctor-img-bg::after { content: "👨‍⚕️"; font-size: 1em; }
+.card-doctor-img-bg::after { content: none; }
 
 /* Paciente chips */
 .card-pac-genero {

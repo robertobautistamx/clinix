@@ -3,13 +3,15 @@
 // ══════════════════════════════════════════════════════
 
 import { useEffect, ReactNode } from 'react';
+import { X } from 'lucide-react';
+import React from 'react';
 
 interface Props {
   open: boolean;
   onClose: () => void;
   title: string;
   subtitle?: string;
-  icon?: string;
+  icon?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
   wide?: boolean;
@@ -40,7 +42,7 @@ export default function Modal({ open, onClose, title, subtitle, icon, children, 
               {subtitle && <p className="modal-subtitulo">{subtitle}</p>}
             </div>
           </div>
-          <button className="modal-cerrar" onClick={onClose}>✕</button>
+          <button className="modal-cerrar" onClick={onClose}><X size={18} /></button>
         </div>
 
         <div className="modal-body">{children}</div>

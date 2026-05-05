@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { User, MapPin, Phone, Shield, AlertTriangle, Save, Plus, Stethoscope, Lightbulb } from 'lucide-react';
 import { useFetch } from '../hooks/useFetch';
 import { pacientesService, Paciente } from '../services/api';
 import Modal from '../components/Modal';
@@ -92,15 +93,15 @@ export default function Pacientes() {
   return (
     <section>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <h2><b>Pacientes Registrados</b></h2>
-          <p className="hospital-subtitulo">Consulta y administra los pacientes del sistema</p>
-        </div>
-        <button className="btn-primary btn-primary--green" onClick={abrirModal}>＋ Agregar Paciente</button>
-      </div>
+            <div>
+              <h2><b>Pacientes Registrados</b></h2>
+              <p className="hospital-subtitulo">Consulta y administra los pacientes del sistema</p>
+            </div>
+            <button className="btn-primary btn-primary--green" onClick={abrirModal}><Plus size={14} style={{ marginRight: 8 }} />Agregar Paciente</button>
+          </div>
 
       {loading && <p>Cargando pacientes...</p>}
-      {error   && <p className="error-txt">⚠️ {error}</p>}
+      {error   && <p className="error-txt">{error}</p>}
 
       {!loading && !error && (
         <div className="hospitales-grid">
@@ -111,20 +112,20 @@ export default function Pacientes() {
                 background: 'linear-gradient(135deg,#27ae60,#2ecc71)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3em',
               }}>
-                <span>{pac.gender === 'F' ? '👩' : '👨'}</span>
-                <span className="card-pac-genero">{pac.gender === 'F' ? '♀ Femenino' : '♂ Masculino'}</span>
+                <User size={48} />
+                <span className="card-pac-genero">{pac.gender === 'F' ? 'Femenino' : 'Masculino'}</span>
               </div>
               <div className="card-hosp-info">
                 <h3>{pac.first_name} {pac.last_name}</h3>
-                <p className="card-hosp-location">🪪 {pac.curp}</p>
+                <p className="card-hosp-location">CURP: {pac.curp}</p>
                 <p className="card-hosp-tipo">
                   {calcEdad(pac.birth_date)}{pac.blood_type ? ` · Tipo ${pac.blood_type}` : ''}
                 </p>
                 <div className="card-pac-datos">
-                  {pac.city            && <span className="card-pac-chip">📍 {pac.city}</span>}
-                  {pac.phone           && <span className="card-pac-chip">📞 {pac.phone}</span>}
-                  {pac.insurance_type  && <span className="card-pac-chip">🛡️ {pac.insurance_type}</span>}
-                  {pac.allergies       && <span className="card-pac-chip card-pac-chip--alerta">⚠️ Alergias</span>}
+                  {pac.city            && <span className="card-pac-chip"><MapPin size={12} style={{ marginRight: 6 }} />{pac.city}</span>}
+                  {pac.phone           && <span className="card-pac-chip"><Phone size={12} style={{ marginRight: 6 }} />{pac.phone}</span>}
+                  {pac.insurance_type  && <span className="card-pac-chip"><Shield size={12} style={{ marginRight: 6 }} />{pac.insurance_type}</span>}
+                  {pac.allergies       && <span className="card-pac-chip card-pac-chip--alerta"><AlertTriangle size={12} style={{ marginRight: 6 }} />Alergias</span>}
                 </div>
               </div>
             </div>
@@ -141,20 +142,20 @@ export default function Pacientes() {
         onClose={cerrarModal}
         title="Registrar Paciente"
         subtitle="Completa los datos del paciente"
-        icon="🧑‍⚕️"
+        icon={<User size={20} />}
         wide
         footer={
           <>
             <button className="modal-btn-cancelar" onClick={cerrarModal}>Cancelar</button>
             <button className="modal-btn-guardar" onClick={guardar} disabled={guardando}>
-              {guardando ? 'Guardando...' : '💾 Guardar Paciente'}
+              {guardando ? 'Guardando...' : <><Save size={14} style={{ marginRight: 8 }} />Guardar Paciente</>}
             </button>
           </>
         }
       >
-        {formError && <p className="error-txt" style={{ marginBottom: 12 }}>⚠️ {formError}</p>}
+        {formError && <p className="error-txt" style={{ marginBottom: 12 }}>{formError}</p>}
 
-        <p className="modal-seccion-titulo">👤 Datos Personales</p>
+        <p className="modal-seccion-titulo">Datos Personales</p>
         <div className="modal-fila">
           <div className="modal-campo"><label>Nombre(s) <span className="req">*</span></label>
             <input name="first_name" value={form.first_name} onChange={handleChange} placeholder="Ej. Juan" maxLength={80} />
@@ -193,7 +194,7 @@ export default function Pacientes() {
           </div>
         </div>
 
-        <p className="modal-seccion-titulo">📍 Contacto y Ubicación</p>
+        <p className="modal-seccion-titulo">Contacto y Ubicación</p>
         <div className="modal-fila">
           <div className="modal-campo"><label>Teléfono</label>
             <input name="phone" type="tel" value={form.phone} onChange={handleChange} placeholder="8331234567" maxLength={20} />
@@ -216,7 +217,7 @@ export default function Pacientes() {
           </div>
         </div>
 
-        <p className="modal-seccion-titulo">🩺 Datos Médicos</p>
+        <p className="modal-seccion-titulo">Datos Médicos</p>
         <div className="modal-fila">
           <div className="modal-campo"><label>Peso (kg)</label>
             <input name="weight_kg" type="number" value={form.weight_kg} onChange={handleChange} placeholder="70.5" min={1} max={300} step={0.01} />
@@ -231,7 +232,7 @@ export default function Pacientes() {
           </div>
         </div>
 
-        <p className="modal-seccion-titulo">🛡️ Seguro Médico</p>
+        <p className="modal-seccion-titulo">Seguro Médico</p>
         <div className="modal-fila">
           <div className="modal-campo"><label>Tipo de seguro</label>
             <select name="insurance_type" value={form.insurance_type} onChange={handleChange}>
@@ -246,13 +247,13 @@ export default function Pacientes() {
           </div>
         </div>
 
-        <p className="modal-seccion-titulo">💡 Hábitos</p>
+        <p className="modal-seccion-titulo">Hábitos</p>
         <div className="modal-fila">
           {(['smoker','alcohol'] as const).map((campo) => (
             <div key={campo} className="modal-campo">
               <label>{campo === 'smoker' ? '¿Fuma?' : '¿Consume alcohol?'}</label>
               <div className="toggle-grupo">
-                {[{ val: 0, label: '✅ No' }, { val: 1, label: campo === 'smoker' ? '🚬 Sí' : '🍺 Sí' }].map(({ val, label }) => (
+                {[{ val: 0, label: 'No' }, { val: 1, label: 'Sí' }].map(({ val, label }) => (
                   <label key={val} className="toggle-opcion">
                     <input type="radio" name={campo} value={val} checked={Number(form[campo]) === val} onChange={handleChange} />
                     <span className={`toggle-pill toggle-pill--${Number(form[campo]) === val ? 'activo' : 'inactivo'}`}>{label}</span>
