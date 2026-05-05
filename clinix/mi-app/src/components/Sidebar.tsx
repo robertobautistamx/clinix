@@ -3,6 +3,8 @@
 // ══════════════════════════════════════════════════════
 
 import { useCarrito } from '../context/CarritoContext';
+import React from 'react';
+import { Home, Users, User, Hospital, Pill, FileText, Lightbulb, Stethoscope, ShoppingCart } from 'lucide-react';
 
 type Seccion =
   | 'inicio' | 'pacientes' | 'doctores' | 'hospital'
@@ -13,14 +15,14 @@ interface Props {
   onNavegar: (s: Seccion) => void;
 }
 
-const NAV_ITEMS: { id: Seccion; label: string; icon: string }[] = [
-  { id: 'inicio',          label: 'Inicio',         icon: '🏠' },
-  { id: 'pacientes',       label: 'Pacientes',       icon: '🧑‍⚕️' },
-  { id: 'doctores',        label: 'Doctores',        icon: '👨‍⚕️' },
-  { id: 'hospital',        label: 'Hospitales',      icon: '🏥' },
-  { id: 'productos',       label: 'Productos',       icon: '💊' },
-  { id: 'transacciones',   label: 'Transacciones',   icon: '📋' },
-  { id: 'recomendaciones', label: 'Recomendaciones', icon: '🤖' },
+const NAV_ITEMS: { id: Seccion; label: string; Icon: any }[] = [
+  { id: 'inicio',          label: 'Inicio',         Icon: Home },
+  { id: 'pacientes',       label: 'Pacientes',      Icon: Users },
+  { id: 'doctores',        label: 'Doctores',       Icon: User },
+  { id: 'hospital',        label: 'Hospitales',     Icon: Hospital },
+  { id: 'productos',       label: 'Productos',      Icon: Pill },
+  { id: 'transacciones',   label: 'Transacciones',  Icon: FileText },
+  { id: 'recomendaciones', label: 'Recomendaciones',Icon: Lightbulb },
 ];
 
 export default function Sidebar({ seccionActiva, onNavegar }: Props) {
@@ -30,7 +32,7 @@ export default function Sidebar({ seccionActiva, onNavegar }: Props) {
     <aside className="sidebar">
       {/* Logo */}
       <div className="sidebar-logo">
-        <span className="sidebar-logo-icon">🩺</span>
+        <span className="sidebar-logo-icon"><Stethoscope size={20} /></span>
         <span className="sidebar-logo-text">MedAI</span>
       </div>
 
@@ -42,7 +44,7 @@ export default function Sidebar({ seccionActiva, onNavegar }: Props) {
             className={`sidebar-btn${seccionActiva === item.id ? ' sidebar-btn--active' : ''}`}
             onClick={() => onNavegar(item.id)}
           >
-            <span className="sidebar-btn-icon">{item.icon}</span>
+            <span className="sidebar-btn-icon">{React.createElement(item.Icon, { size: 18 })}</span>
             <span>{item.label}</span>
           </button>
         ))}
@@ -53,7 +55,7 @@ export default function Sidebar({ seccionActiva, onNavegar }: Props) {
         className={`sidebar-btn sidebar-btn--carrito${seccionActiva === 'carrito' ? ' sidebar-btn--active' : ''}`}
         onClick={() => onNavegar('carrito')}
       >
-        <span className="sidebar-btn-icon">🛒</span>
+        <span className="sidebar-btn-icon">{React.createElement(ShoppingCart, { size: 18 })}</span>
         <span>Carrito</span>
         {totalItems > 0 && <span className="carrito-badge">{totalItems}</span>}
       </button>

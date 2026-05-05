@@ -3,6 +3,7 @@
 // ══════════════════════════════════════════════════════
 
 import { useState } from 'react';
+import { User, Pill, Check, AlertTriangle, ChevronLeft } from 'lucide-react';
 
 interface Zona {
   id: string;
@@ -10,10 +11,10 @@ interface Zona {
 }
 
 const ZONAS: Zona[] = [
-  { id: 'cabeza',   label: '🧠 Cabeza' },
-  { id: 'pecho',    label: '❤️ Pecho' },
-  { id: 'estomago', label: '🫃 Estómago' },
-  { id: 'general',  label: '🤒 General' },
+  { id: 'cabeza',   label: 'Cabeza' },
+  { id: 'pecho',    label: 'Pecho' },
+  { id: 'estomago', label: 'Estómago' },
+  { id: 'general',  label: 'General' },
 ];
 
 const SINTOMAS_POR_ZONA: Record<string, string[]> = {
@@ -25,8 +26,9 @@ const SINTOMAS_POR_ZONA: Record<string, string[]> = {
 
 const NIVEL_LABELS: string[] = [
   '', 'Muy leve', 'Leve', 'Moderado-leve', 'Moderado', 'Moderado',
-  'Significativo', 'Intenso', 'Muy intenso', 'Severo', '🚨 Urgente',
+  'Significativo', 'Intenso', 'Muy intenso', 'Severo', 'Urgente',
 ];
+
 
 const NIVEL_COLORS: string[] = [
   '', '#27ae60','#27ae60','#f1c40f','#f1c40f','#e67e22',
@@ -86,7 +88,7 @@ export default function Inicio() {
 
         {resultado.intensidad >= 8 && (
           <div className="alerta-box">
-            <p>⚠️ Intensidad alta detectada. Si sientes dolor severo, busca atención de urgencias.</p>
+            <p><AlertTriangle size={16} style={{ marginRight: 8 }} /> Intensidad alta detectada. Si sientes dolor severo, busca atención de urgencias.</p>
           </div>
         )}
 
@@ -104,7 +106,7 @@ export default function Inicio() {
         </div>
 
         <div className="card card-doctor" style={{ marginTop: 14 }}>
-          <span className="doc-icon">👨‍⚕️</span>
+          <span className="doc-icon"><User size={36} /></span>
           <div>
             <p className="doc-label">Especialista recomendado</p>
             <p className="doc-nombre">{resultado.especialista}</p>
@@ -112,14 +114,14 @@ export default function Inicio() {
         </div>
 
         <div className="card" style={{ marginTop: 14 }}>
-          <p><b>💊 Medicamento sugerido:</b> {resultado.medicamento}</p>
+          <p><b><Pill size={14} style={{ marginRight: 8 }} /> Medicamento sugerido:</b> {resultado.medicamento}</p>
           <p style={{ fontSize: '0.82em', color: '#7a94a8', marginTop: 8 }}>
             Consulta siempre a un médico antes de automedicarte.
           </p>
         </div>
 
         <button className="btn-primary" style={{ marginTop: 20 }} onClick={reiniciar}>
-          ← Volver al inicio
+          <ChevronLeft size={14} style={{ marginRight: 8 }} />Volver al inicio
         </button>
       </div>
     );
@@ -136,13 +138,13 @@ export default function Inicio() {
         <p style={{ color: 'rgba(44,62,80,0.7)' }}>Zona: <b>{zona}</b></p>
 
         <div className="opciones" style={{ flexWrap: 'wrap' }}>
-          {sintomas.map((s) => (
+            {sintomas.map((s) => (
             <button
               key={s}
               className={`opcion-btn${sintomasSeleccionados.includes(s) ? ' opcion-btn--selected' : ''}`}
               onClick={() => toggleSintoma(s)}
             >
-              {sintomasSeleccionados.includes(s) ? '✅ ' : ''}{s}
+              {sintomasSeleccionados.includes(s) ? <Check size={12} style={{ marginRight: 8 }} /> : null}{s}
             </button>
           ))}
         </div>
@@ -174,7 +176,7 @@ export default function Inicio() {
         </div>
 
         <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
-          <button className="btn-secondary" onClick={reiniciar}>← Volver</button>
+          <button className="btn-secondary" onClick={reiniciar}><ChevronLeft size={14} style={{ marginRight: 8 }} />Volver</button>
           <button
             className="btn-primary"
             disabled={sintomasSeleccionados.length === 0}

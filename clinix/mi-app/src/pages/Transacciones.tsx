@@ -2,10 +2,11 @@
 //  pages/Transacciones.tsx
 // ══════════════════════════════════════════════════════
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useFetch } from '../hooks/useFetch';
 import { transaccionesService, Transaccion } from '../services/api';
 import Paginacion from '../components/Paginacion';
+import { FileText } from 'lucide-react';
 
 export default function Transacciones() {
   const [page, setPage] = useState(1);
@@ -27,11 +28,11 @@ export default function Transacciones() {
       <p className="hospital-subtitulo">Historial de compras realizadas</p>
 
       {loading && <p>Cargando transacciones...</p>}
-      {error   && <p className="error-txt">⚠️ {error}</p>}
+      {error   && <p className="error-txt">{error}</p>}
 
       {!loading && !error && lista.length === 0 && (
         <div className="card" style={{ textAlign: 'center', padding: 40 }}>
-          <p style={{ fontSize: '2.5em' }}>📋</p>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>{React.createElement(FileText, { size: 48 })}</div>
           <p>No hay transacciones registradas aún.</p>
         </div>
       )}

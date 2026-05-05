@@ -3,6 +3,7 @@
 // ══════════════════════════════════════════════════════
 
 import { useState } from 'react';
+import { Stethoscope, Check, X, Phone, Plus, Save, User } from 'lucide-react';
 import { useFetch } from '../hooks/useFetch';
 import { doctoresService, Doctor } from '../services/api';
 import Modal from '../components/Modal';
@@ -89,33 +90,33 @@ export default function Doctores() {
   return (
     <section>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <h2><b>Doctores Disponibles</b></h2>
-          <p className="hospital-subtitulo">Consulta los médicos registrados en el sistema</p>
-        </div>
-        <button className="btn-primary" onClick={abrirModal}>＋ Agregar Doctor</button>
-      </div>
+            <div>
+              <h2><b>Doctores Disponibles</b></h2>
+              <p className="hospital-subtitulo">Consulta los médicos registrados en el sistema</p>
+            </div>
+            <button className="btn-primary" onClick={abrirModal}><Plus size={14} style={{ marginRight: 8 }} />Agregar Doctor</button>
+          </div>
 
       {loading && <p>Cargando doctores...</p>}
-      {error   && <p className="error-txt">⚠️ {error}</p>}
+      {error   && <p className="error-txt">{error}</p>}
 
       {!loading && !error && (
         <div className="hospitales-grid">
           {lista.length === 0 && <p>No hay doctores registrados.</p>}
           {lista.map((doc) => (
             <div key={doc.doctor_id} className="card-hosp">
-              <div className="card-hosp-img card-doctor-img-bg" />
+              <div className="card-hosp-img card-doctor-img-bg">{<Stethoscope size={48} />}</div>
               <div className="card-hosp-info">
                 <h3>{doc.first_name} {doc.last_name}</h3>
-                <p className="card-hosp-location">🩺 {doc.specialty}</p>
+                <p className="card-hosp-location"><Stethoscope size={14} style={{ marginRight: 8 }} />{doc.specialty}</p>
                 <p className="card-hosp-tipo">
                   {doc.years_exp ? `${doc.years_exp} años de experiencia` : 'Experiencia no especificada'}
                 </p>
                 <div className="card-hosp-footer">
                   <span style={{ fontSize: '0.8em', color: doc.active ? '#27ae60' : '#e74c3c', fontWeight: 700 }}>
-                    {doc.active ? '✅ Activo' : '⛔ Inactivo'}
+                    {doc.active ? <><Check size={12} style={{ marginRight: 6 }} />Activo</> : <><X size={12} style={{ marginRight: 6 }} />Inactivo</>}
                   </span>
-                  {doc.phone && <span style={{ fontSize: '0.8em' }}>📞 {doc.phone}</span>}
+                  {doc.phone && <span style={{ fontSize: '0.8em' }}><Phone size={12} style={{ marginRight: 8 }} />{doc.phone}</span>}
                 </div>
               </div>
             </div>
@@ -132,17 +133,17 @@ export default function Doctores() {
         onClose={cerrarModal}
         title="Registrar Doctor"
         subtitle="Completa los campos del médico"
-        icon="👨‍⚕️"
+        icon={<User size={20} />}
         footer={
           <>
             <button className="modal-btn-cancelar" onClick={cerrarModal}>Cancelar</button>
             <button className="modal-btn-guardar" onClick={guardar} disabled={guardando}>
-              {guardando ? 'Guardando...' : '💾 Guardar Doctor'}
+              {guardando ? 'Guardando...' : <><Save size={14} style={{ marginRight: 8 }} />Guardar Doctor</>}
             </button>
           </>
         }
       >
-        {formError && <p className="error-txt" style={{ marginBottom: 12 }}>⚠️ {formError}</p>}
+        {formError && <p className="error-txt" style={{ marginBottom: 12 }}>{formError}</p>}
 
         <div className="modal-fila">
           <div className="modal-campo">
@@ -195,7 +196,7 @@ export default function Doctores() {
           <div className="modal-campo modal-campo--full">
             <label>Estatus</label>
             <div className="toggle-grupo">
-              {([{ val: 1, label: '✅ Activo' }, { val: 0, label: '⛔ Inactivo' }] as const).map(({ val, label }) => (
+              {([{ val: 1, label: (<><Check size={12} style={{ marginRight: 6 }} />Activo</>) }, { val: 0, label: (<><X size={12} style={{ marginRight: 6 }} />Inactivo</>) }] as const).map(({ val, label }) => (
                 <label key={val} className="toggle-opcion">
                   <input type="radio" name="active" value={val} checked={Number(form.active) === val} onChange={handleChange} />
                   <span className={`toggle-pill toggle-pill--${Number(form.active) === val ? 'activo' : 'inactivo'}`}>{label}</span>
