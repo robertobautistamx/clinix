@@ -5,6 +5,8 @@
 import { useEffect, useState } from 'react';
 import { recomendacionesService, RecomendacionApriori } from '../services/api';
 import { Bot, Package } from 'lucide-react';
+import Loader from '../components/Loader';
+import SearchBar from '../components/SearchBar';
 
 function colorProbabilidad(p: number): string {
   if (p >= 80) return '#27ae60';
@@ -16,6 +18,7 @@ export default function Recomendaciones() {
   const [recomendaciones, setRecomendaciones] = useState<RecomendacionApriori[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [busqueda, setBusqueda] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -46,6 +49,12 @@ export default function Recomendaciones() {
     return () => { cancelled = true; };
   }, []);
 
+  const listaFiltrada = recomendaciones.filter((rec) => {
+    if (!busqueda) return true;
+    const texto = `${rec.producto_base} ${rec.producto_recomendado}`.toLowerCase();
+    return texto.includes(busqueda.toLowerCase());
+  });
+
   return (
     <section>
       <h2><b>Recomendaciones Inteligentes</b></h2>
@@ -53,9 +62,15 @@ export default function Recomendaciones() {
         Sugerencias basadas en el algoritmo Apriori — productos comprados juntos por nuestros pacientes
       </p>
 
+      <SearchBar
+        value={busqueda}
+        onChange={setBusqueda}
+        placeholder="Buscar por producto base o recomendado..."
+      />
+
       {loading && (
-        <div style={{ textAlign: 'center', padding: '2em' }}>
-          <p>Cargando recomendaciones...</p>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
+          <Loader />
         </div>
       )}
 
@@ -68,7 +83,7 @@ export default function Recomendaciones() {
         </div>
       )}
 
-      {!loading && !error && recomendaciones.length === 0 && (
+      {!loading && !error && listaFiltrada.length === 0 && (
         <div style={{ background: '#fffbe6', padding: '1em', borderRadius: 8, margin: '1em 0' }}>
           <p>No hay suficientes datos para generar recomendaciones.</p>
           <p style={{ fontSize: '0.9em' }}>
@@ -77,9 +92,9 @@ export default function Recomendaciones() {
         </div>
       )}
 
-      {!loading && !error && recomendaciones.length > 0 && (
+      {!loading && !error && listaFiltrada.length > 0 && (
         <div className="hospitales-grid">
-          {recomendaciones.map((rec, i) => (
+          {listaFiltrada.map((rec, i) => (
             <div key={`${rec.base_id}-${rec.recomendado_id}-${i}`} className="card-hosp">
               <div
                 className="card-hosp-img"

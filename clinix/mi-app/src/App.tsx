@@ -5,6 +5,7 @@ import { ReactElement, useState } from 'react';
 import './App.css';
 
 import { CarritoProvider } from './context/CarritoContext';
+import CartPanel from './components/CartPanel';
 
 import Inicio          from './pages/Inicio';
 import Pacientes       from './pages/Pacientes';
@@ -33,16 +34,18 @@ const PAGINAS: Record<Seccion, ReactElement> = {
 
 export default function App() {
   const [seccion, setSeccion] = useState<Seccion>('inicio');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <CarritoProvider>
       <div className="layout">
-        <Sidebar seccionActiva={seccion} onNavegar={setSeccion} />
-        <main>
+        <Sidebar seccionActiva={seccion} onNavegar={setSeccion} isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+        <main style={{ width: `calc(100% - ${sidebarOpen ? 250 : 70}px)`, transition: 'width 0.3s ease', overflowX: 'hidden' }}>
           <div className="page active">
             {PAGINAS[seccion]}
           </div>
         </main>
+        <CartPanel />
       </div>
     </CarritoProvider>
   );

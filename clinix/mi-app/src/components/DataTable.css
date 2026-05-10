@@ -1,0 +1,135 @@
+/* DataTable - mejor estilo, compacto y responsive */
+.datatable {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 12px 34px rgba(15,34,60,0.06);
+  border: 1px solid rgba(15,34,60,0.04);
+}
+.datatable-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.datatable-search {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.06);
+  background: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.datatable-actions {
+  display: flex;
+  gap: 8px;
+}
+.datatable-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.06);
+  background: #f6f9fc;
+  cursor: pointer;
+}
+.datatable-btn:hover { opacity: 0.96; }
+.datatable-btn.primary {
+  background: linear-gradient(90deg,#3a7bd5,#5a9bf5);
+  color: #fff;
+  border: none;
+}
+.datatable-btn.ghost {
+  background: transparent;
+  border: none;
+  padding: 6px;
+}
+.datatable-btn.danger,
+.datatable-btn.ghost.danger {
+  color: #c0392b;
+}
+.datatable-table-wrap {
+  overflow: auto;
+  border-radius: 8px;
+}
+.datatable-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+  background: transparent;
+}
+.datatable-table th,
+.datatable-table td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.datatable-table thead th {
+  font-weight: 700;
+  font-size: 0.95em;
+  color: #1a2e40;
+  background: #f1f5f9;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.datatable-col-filter {
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 6px 8px;
+  background: #fff;
+  box-sizing: border-box;
+  display: none;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: all 180ms ease;
+}
+.datatable--filters-open .datatable-col-filter {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.datatable-col-filter::placeholder { color: #9aa7b5; }
+.datatable-col-filter:focus { outline: none; border-color: #3a7bd5; box-shadow: 0 6px 18px rgba(58,123,213,0.08); }
+
+.datatable-filter-btn { display: inline-flex; align-items: center; justify-content: center; padding: 8px; border-radius: 8px; }
+.datatable-filter-btn.active { background: rgba(58,123,213,0.12); box-shadow: 0 6px 14px rgba(58,123,213,0.06); }
+.datatable-table tbody tr { transition: background 0.18s ease, transform 0.18s ease; }
+.datatable-table tbody tr:hover { background: rgba(58,123,213,0.06); transform: translateY(-1px); }
+
+/* Alternating row backgrounds: white / light gray */
+.datatable-table tbody tr:nth-child(odd) td { background: #ffffff; }
+.datatable-table tbody tr:nth-child(even) td { background: #f6f7fa; }
+.datatable-table tbody tr:hover td { background: rgba(58,123,213,0.06) !important; }
+
+.datatable-table td { transition: background-color 170ms ease, color 160ms ease; }
+.datatable-actions-cell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.datatable--compact .datatable-table th,
+.datatable--compact .datatable-table td { padding: 8px 10px; font-size: 0.95em; }
+.datatable--compact .datatable-search { padding: 8px 10px; }
+.datatable-sort-indicator { font-size: 0.86em; color: rgba(0,0,0,0.45); display:inline-block; transform-origin: center; transition: transform 200ms ease, color 200ms ease; }
+.datatable-th.sorted .datatable-sort-indicator { transform: rotate(180deg); color: #3a7bd5; }
+
+.datatable-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 6px;
+  border-radius: 999px;
+  background: #e74c3c; color: white; font-size: 0.72em; font-weight: 800;
+  margin-left: 6px;
+}
+
+.datatable-filter-btn { position: relative; }
+
+@media (max-width: 800px) {
+  .datatable-table { min-width: 600px; }
+  .datatable-toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+}

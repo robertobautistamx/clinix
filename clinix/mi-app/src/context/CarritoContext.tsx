@@ -17,12 +17,16 @@ interface CarritoContextType {
   vaciar: () => void;
   total: number;
   totalItems: number;
+  isOpen: boolean;
+  abrirCarrito: () => void;
+  cerrarCarrito: () => void;
 }
 
 const CarritoContext = createContext<CarritoContextType | null>(null);
 
 export function CarritoProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ItemCarrito[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
 
   const agregar = useCallback((producto: Producto) => {
     setItems((prev) => {
@@ -52,11 +56,17 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
 
   const vaciar = useCallback(() => setItems([]), []);
 
-  const total = items.reduce((acc, i) => acc + (i.price ?? 0) * i.cantidad, 0);
+  const total = items.reduce((acc, i) => {
+    const p = (i as any).price ?? (i as any).unit_price ?? (i as any).unitPrice ?? 0;
+    return acc + (Number(p) || 0) * i.cantidad;
+  }, 0);
   const totalItems = items.reduce((acc, i) => acc + i.cantidad, 0);
 
+  const abrirCarrito = useCallback(() => setIsOpen(true), []);
+  const cerrarCarrito = useCallback(() => setIsOpen(false), []);
+
   return (
-    <CarritoContext.Provider value={{ items, agregar, quitar, cambiarCantidad, vaciar, total, totalItems }}>
+    <CarritoContext.Provider value={{ items, agregar, quitar, cambiarCantidad, vaciar, total, totalItems, isOpen, abrirCarrito, cerrarCarrito }}>
       {children}
     </CarritoContext.Provider>
   );
