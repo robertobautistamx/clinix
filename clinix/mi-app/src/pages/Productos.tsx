@@ -8,9 +8,12 @@ import { useCarrito } from '../context/CarritoContext';
 import { useState } from 'react';
 import { Pill, Check, ShoppingCart, AlertTriangle } from 'lucide-react';
 import Paginacion from '../components/Paginacion';
+import Loader from '../components/Loader';
+import SearchBar from '../components/SearchBar';
 
 export default function Productos() {
   const [page, setPage] = useState(1);
+  const [busqueda, setBusqueda] = useState('');
   const { data, loading, error } = useFetch(() =>
     productosService.getPaginated({ page, limit: 50 })
   , [page]);
@@ -30,18 +33,34 @@ export default function Productos() {
     lista = lista.slice((page - 1) * 50, page * 50);
   }
 
+  const listaFiltrada = lista.filter((prod) => {
+    if (!busqueda) return true;
+    const texto = `${prod.name} ${prod.description ?? ''} ${(prod as any).category ?? ''}`.toLowerCase();
+    return texto.includes(busqueda.toLowerCase());
+  });
+
   return (
     <section>
       <h2><b>Productos / Medicamentos</b></h2>
       <p className="hospital-subtitulo">Agrega medicamentos a tu carrito</p>
 
-      {loading && <p>Cargando productos...</p>}
+      <SearchBar
+        value={busqueda}
+        onChange={setBusqueda}
+        placeholder="Buscar por nombre o categoria..."
+      />
+
+      {loading && (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
+          <Loader />
+        </div>
+      )}
       {error   && <p className="error-txt">{error}</p>}
 
       {!loading && !error && (
         <div className="hospitales-grid">
-          {lista.length === 0 && <p>No hay productos registrados.</p>}
-          {lista.map((prod) => {
+          {listaFiltrada.length === 0 && <p>No hay productos que coincidan con la búsqueda.</p>}
+          {listaFiltrada.map((prod) => {
             const precioStr = (prod as any).unit_price ?? prod.price;
             const precioNum = precioStr != null ? Number(precioStr) : null;
             const stock = (prod as any).stock_units ?? prod.stock ?? 0;
@@ -94,7 +113,7 @@ export default function Productos() {
         </div>
       )}
 
-      {!loading && !error && lista.length > 0 && (
+      {!loading && !error && listaFiltrada.length > 0 && (
         <Paginacion paginaActual={page} totalPaginas={totalPaginas} cambiarPagina={setPage} />
       )}
     </section>

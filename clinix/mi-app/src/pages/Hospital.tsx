@@ -7,6 +7,8 @@ import { useFetch } from '../hooks/useFetch';
 import { hospitalesService, Hospital as HospitalType } from '../services/api';
 import Paginacion from '../components/Paginacion';
 import { Hospital as HospitalIcon, MapPin, Phone, Map } from 'lucide-react';
+import Loader from '../components/Loader';
+import SearchBar from '../components/SearchBar';
 
 function irHospital(query: string) {
   const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
@@ -15,6 +17,7 @@ function irHospital(query: string) {
 
 export default function Hospital() {
   const [page, setPage] = useState(1);
+  const [busqueda, setBusqueda] = useState('');
   const { data, loading, error } = useFetch(() =>
     hospitalesService.getPaginated({ page, limit: 50 })
   , [page]);
@@ -28,18 +31,34 @@ export default function Hospital() {
     lista = lista.slice((page - 1) * 50, page * 50);
   }
 
+  const listaFiltrada = lista.filter((hosp) => {
+    if (!busqueda) return true;
+    const texto = `${hosp.name} ${hosp.city ?? ''} ${hosp.state ?? ''} ${hosp.address ?? ''}`.toLowerCase();
+    return texto.includes(busqueda.toLowerCase());
+  });
+
   return (
     <section>
       <h2><b>Hospitales Cercanos</b></h2>
       <p className="hospital-subtitulo">Selecciona un hospital para obtener cómo llegar</p>
 
-      {loading && <p>Cargando hospitales...</p>}
+      <SearchBar
+        value={busqueda}
+        onChange={setBusqueda}
+        placeholder="Buscar por nombre, ciudad o estado..."
+      />
+
+      {loading && (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
+          <Loader />
+        </div>
+      )}
       {error   && <p className="error-txt">{error}</p>}
 
       {!loading && !error && (
         <div className="hospitales-grid">
-          {lista.length === 0 && <p>No hay hospitales registrados.</p>}
-          {lista.map((h) => (
+          {listaFiltrada.length === 0 && <p>No hay hospitales que coincidan con la búsqueda.</p>}
+          {listaFiltrada.map((h) => (
             <div key={h.hospital_id} className="card-hosp" onClick={() => irHospital(`${h.name}, ${h.city || ''}, ${h.state || ''}`)}>
               <div className="card-hosp-img" style={{ background: 'linear-gradient(135deg,#3a7bd5,#5a9bf5)' }}>
                 <span className="card-hosp-badge" style={{ background: 'rgba(255,255,255,0.92)', color: '#3a7bd5' }}>
@@ -63,7 +82,7 @@ export default function Hospital() {
         </div>
       )}
 
-      {!loading && !error && lista.length > 0 && (
+      {!loading && !error && listaFiltrada.length > 0 && (
         <Paginacion paginaActual={page} totalPaginas={totalPaginas} cambiarPagina={setPage} />
       )}
     </section>

@@ -3,7 +3,10 @@
 // ══════════════════════════════════════════════════════
 
 import { useState } from 'react';
-import { User, Pill, Check, AlertTriangle, ChevronLeft } from 'lucide-react';
+import { User, Pill, Check, AlertTriangle, ChevronLeft, TrendingUp, Activity } from 'lucide-react';
+import { useFetch } from '../hooks/useFetch';
+import { pacientesService, doctoresService, productosService, transaccionesService } from '../services/api';
+import Loader from '../components/Loader';
 
 interface Zona {
   id: string;
@@ -55,6 +58,54 @@ export default function Inicio() {
   const [sintomasSeleccionados, setSintomasSeleccionados] = useState<string[]>([]);
   const [intensidad, setIntensidad] = useState(5);
   const [resultado, setResultado] = useState<ResultadoDx | null>(null);
+
+  const { data: pacientesRes } = useFetch(() => pacientesService.getPaginated({ page: 1, limit: 1 }), []);
+  const { data: doctoresRes } = useFetch(() => doctoresService.getPaginated({ page: 1, limit: 1 }), []);
+  const { data: productosRes } = useFetch(() => productosService.getPaginated({ page: 1, limit: 1 }), []);
+  const { data: transaccionesRes, loading: loadingTx } = useFetch(
+    () => transaccionesService.getPaginated({ page: 1, limit: 12 }),
+    []
+  );
+
+  const getTotal = (res: any) => {
+    if (!res) return 0;
+    if (Array.isArray(res)) return res.length;
+    return Number(res.total ?? res?.data?.length ?? 0);
+  };
+
+  const totalPacientes = getTotal(pacientesRes);
+  const totalDoctores = getTotal(doctoresRes);
+  const totalProductos = getTotal(productosRes);
+  const totalTransacciones = getTotal(transaccionesRes);
+
+  const transaccionesLista = Array.isArray(transaccionesRes)
+    ? transaccionesRes
+    : (transaccionesRes as any)?.data ?? (transaccionesRes as any)?.items ?? [];
+
+  const txValues = transaccionesLista
+    .slice(0, 10)
+    .map((tx: any) => Number(tx.total_amount ?? tx.total ?? 0))
+    .reverse();
+
+  const ingresosRecientes = txValues.reduce((acc: number, v: number) => acc + v, 0);
+  const ticketPromedio = txValues.length ? ingresosRecientes / txValues.length : 0;
+
+  const maxVal = Math.max(1, ...txValues);
+  const sparkPoints = txValues.length
+    ? txValues.map((v: number, i: number) => {
+        const x = (i / Math.max(1, txValues.length - 1)) * 240;
+        const y = 64 - (v / maxVal) * 56 - 4;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(' ')
+    : '0,60 240,60';
+
+  const barras = [
+    { label: 'Pacientes', value: totalPacientes },
+    { label: 'Doctores', value: totalDoctores },
+    { label: 'Productos', value: totalProductos },
+    { label: 'Transacciones', value: totalTransacciones },
+  ];
+  const maxBar = Math.max(1, ...barras.map((b) => b.value));
 
   function seleccionarZona(z: string) {
     setZona(z);
@@ -200,6 +251,97 @@ export default function Inicio() {
             {z.label}
           </button>
         ))}
+      </div>
+
+      <div className="dashboard-top" style={{ marginTop: 30 }}>
+        <div className="dashboard-head">
+          <div>
+            <h2 className="dashboard-title">Panel Clinico</h2>
+            <p className="dashboard-subtitle">Resumen operativo en tiempo real</p>
+          </div>
+          <div className="dashboard-kpis">
+            <div className="stat-card">
+              <p className="stat-label">Ingresos recientes</p>
+              <p className="stat-kpi">${ingresosRecientes.toFixed(2)} MXN</p>
+              <span className="stat-chip"><TrendingUp size={14} /> +{txValues.length} transacciones</span>
+            </div>
+            <div className="stat-card">
+              <p className="stat-label">Ticket promedio</p>
+              <p className="stat-kpi">${ticketPromedio.toFixed(2)} MXN</p>
+              <span className="stat-chip"><Activity size={14} /> Ultimos 10 movimientos</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="dashboard-grid">
+          <div className="stat-mini">
+            <p>Pacientes</p>
+            <b>{totalPacientes}</b>
+          </div>
+          <div className="stat-mini">
+            <p>Doctores</p>
+            <b>{totalDoctores}</b>
+          </div>
+          <div className="stat-mini">
+            <p>Productos</p>
+            <b>{totalProductos}</b>
+          </div>
+          <div className="stat-mini">
+            <p>Transacciones</p>
+            <b>{totalTransacciones}</b>
+          </div>
+        </div>
+
+        <div className="dashboard-charts">
+          <div className="chart-card">
+            <div className="chart-header">
+              <div>
+                <p className="chart-title">Ingresos por compra</p>
+                <span className="chart-subtitle">Ultimos 10 registros</span>
+              </div>
+            </div>
+            <div className="chart-body">
+              {loadingTx ? (
+                <div className="chart-loading"><Loader /></div>
+              ) : (
+                <svg className="sparkline" viewBox="0 0 240 64" preserveAspectRatio="none">
+                  <polyline
+                    points={sparkPoints}
+                    fill="none"
+                    stroke="#3a7bd5"
+                    strokeWidth="3"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              )}
+            </div>
+          </div>
+          <div className="chart-card">
+            <div className="chart-header">
+              <div>
+                <p className="chart-title">Resumen de registros</p>
+                <span className="chart-subtitle">Distribucion general</span>
+              </div>
+            </div>
+            <div className="chart-body">
+              <div className="bar-list">
+                {barras.map((item) => (
+                  <div key={item.label} className="bar-row">
+                    <span className="bar-label">{item.label}</span>
+                    <div className="bar-track">
+                      <div
+                        className="bar-fill"
+                        style={{ width: `${(item.value / maxBar) * 100}%` }}
+                      />
+                    </div>
+                    <span className="bar-value">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

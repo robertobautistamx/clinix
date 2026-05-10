@@ -3,6 +3,7 @@
 // ══════════════════════════════════════════════════════
 
 import { useEffect, ReactNode } from 'react';
+import './Modal.css';
 import { X } from 'lucide-react';
 import React from 'react';
 
