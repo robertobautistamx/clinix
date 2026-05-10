@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { User, MapPin, Phone, Shield, AlertTriangle, Save, Plus, Stethoscope, Lightbulb } from 'lucide-react';
+import DataTable from '../components/DataTable';
+import { validateFields } from '../hooks/useValidator';
 import { useFetch } from '../hooks/useFetch';
 import { pacientesService, Paciente } from '../services/api';
 import Modal from '../components/Modal';
+import ValidationMessages from '../components/ValidationMessages';
 import Paginacion from '../components/Paginacion';
 import Loader from '../components/Loader';
 import SearchBar from '../components/SearchBar';
+import { useViewMode } from '../hooks/useViewMode';
 
 interface FormPaciente {
   first_name: string; last_name: string; curp: string; birth_date: string;
@@ -37,9 +41,12 @@ export default function Pacientes() {
   const [form, setForm] = useState<FormPaciente>(FORM_INICIAL);
   const [guardando, setGuardando] = useState(false);
   const [formError, setFormError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string,string>>({});
   const [busqueda, setBusqueda] = useState('');
+  const [view, setView] = useViewMode('pacientes');
+  const [editingId, setEditingId] = useState<number | null>(null);
 
-  function abrirModal() { setForm(FORM_INICIAL); setFormError(''); setModalAbierto(true); }
+  function abrirModal() { setEditingId(null); setForm(FORM_INICIAL); setFormError(''); setFieldErrors({}); setModalAbierto(true); }
   function cerrarModal() { setModalAbierto(false); }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
@@ -48,14 +55,24 @@ export default function Pacientes() {
   }
 
   async function guardar() {
-    if (!form.first_name || !form.last_name || !form.curp || !form.birth_date || !form.gender) {
-      setFormError('Completa los campos obligatorios (*)');
+    const rules = {
+      first_name: { required: true, message: 'Nombre requerido' },
+      last_name: { required: true, message: 'Apellido requerido' },
+      curp: { required: true, minLength: 18, message: 'CURP requerido (18 caracteres)' },
+      birth_date: { required: true, message: 'Fecha de nacimiento requerida' },
+      gender: { required: true, message: 'Género requerido' },
+    };
+    const { valid, errors } = validateFields(rules, form as any);
+    if (!valid) {
+      setFieldErrors(errors);
+      setFormError('Corrige los campos marcados');
       return;
     }
     setGuardando(true);
     setFormError('');
+    setFieldErrors({});
     try {
-      await pacientesService.create({
+      const payload = {
         first_name: form.first_name,
         last_name: form.last_name,
         curp: form.curp.toUpperCase(),
@@ -74,8 +91,14 @@ export default function Pacientes() {
         insurance_id: form.insurance_id || undefined,
         smoker: Number(form.smoker),
         alcohol: Number(form.alcohol),
-      });
+      } as any;
+      if (editingId) {
+        await pacientesService.update(editingId, payload);
+      } else {
+        await pacientesService.create(payload);
+      }
       cerrarModal();
+      setEditingId(null);
       refetch();
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : 'Error al guardar');
@@ -83,6 +106,30 @@ export default function Pacientes() {
       setGuardando(false);
     }
   }
+
+  const handleEdit = (pac: Paciente) => {
+    setEditingId(pac.patient_id);
+    setForm({
+      first_name: pac.first_name ?? '', last_name: pac.last_name ?? '', curp: pac.curp ?? '', birth_date: pac.birth_date ?? '',
+      gender: pac.gender ?? 'M', blood_type: pac.blood_type ?? '', phone: pac.phone ?? '', email: pac.email ?? '',
+      city: pac.city ?? '', state: pac.state ?? '', address: pac.address ?? '', weight_kg: pac.weight_kg ? String(pac.weight_kg) : '',
+      height_cm: pac.height_cm ? String(pac.height_cm) : '', allergies: pac.allergies ?? '', insurance_type: pac.insurance_type ?? '',
+      insurance_id: pac.insurance_id ?? '', smoker: pac.smoker ?? 0, alcohol: pac.alcohol ?? 0,
+    });
+    setFormError('');
+    setModalAbierto(true);
+  };
+
+  const handleDelete = async (pac: Paciente) => {
+    if (!window.confirm(`¿Eliminar al paciente ${pac.first_name} ${pac.last_name}?`)) return;
+    try {
+      await pacientesService.delete(pac.patient_id);
+      refetch();
+      alert('Paciente eliminado');
+    } catch (err: any) {
+      alert('Error eliminando: ' + (err.message || err));
+    }
+  };
 
   const resData: any = data;
   let lista: Paciente[] = Array.isArray(resData) ? resData : (resData?.data ?? resData?.items ?? []);
@@ -109,11 +156,25 @@ export default function Pacientes() {
             <button className="btn-primary btn-primary--green" onClick={abrirModal}><Plus size={14} style={{ marginRight: 8 }} />Agregar Paciente</button>
           </div>
 
-      <SearchBar
-        value={busqueda}
-        onChange={setBusqueda}
-        placeholder="Buscar por nombre, CURP o ciudad..."
-      />
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ flex: 1, marginRight: 12 }}>
+          <SearchBar value={busqueda} onChange={setBusqueda} placeholder="Buscar por nombre, CURP o ciudad..." />
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            style={{ padding: '8px 10px', borderRadius: 8, border: view === 'grid' ? '2px solid #3a7bd5' : '1px solid rgba(0,0,0,0.08)', background: view === 'grid' ? '#eaf3ff' : '#fff' }}
+            onClick={() => setView('grid')}
+          >
+            Grid
+          </button>
+          <button
+            style={{ padding: '8px 10px', borderRadius: 8, border: view === 'table' ? '2px solid #3a7bd5' : '1px solid rgba(0,0,0,0.08)', background: view === 'table' ? '#eaf3ff' : '#fff' }}
+            onClick={() => setView('table')}
+          >
+            Tabla
+          </button>
+        </div>
+      </div>
 
       {loading && (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
@@ -123,33 +184,52 @@ export default function Pacientes() {
       {error   && <p className="error-txt">{error}</p>}
 
       {!loading && !error && (
-        <div className="hospitales-grid">
-          {listaFiltrada.length === 0 && <p>No hay pacientes que coincidan con la búsqueda.</p>}
-          {listaFiltrada.map((pac) => (
-            <div key={pac.patient_id} className="card-hosp">
-              <div className="card-hosp-img" style={{
-                background: 'linear-gradient(135deg,#27ae60,#2ecc71)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3em',
-              }}>
-                <User size={48} />
-                <span className="card-pac-genero">{pac.gender === 'F' ? 'Femenino' : 'Masculino'}</span>
-              </div>
-              <div className="card-hosp-info">
-                <h3>{pac.first_name} {pac.last_name}</h3>
-                <p className="card-hosp-location">CURP: {pac.curp}</p>
-                <p className="card-hosp-tipo">
-                  {calcEdad(pac.birth_date)}{pac.blood_type ? ` · Tipo ${pac.blood_type}` : ''}
-                </p>
-                <div className="card-pac-datos">
-                  {pac.city            && <span className="card-pac-chip"><MapPin size={12} style={{ marginRight: 6 }} />{pac.city}</span>}
-                  {pac.phone           && <span className="card-pac-chip"><Phone size={12} style={{ marginRight: 6 }} />{pac.phone}</span>}
-                  {pac.insurance_type  && <span className="card-pac-chip"><Shield size={12} style={{ marginRight: 6 }} />{pac.insurance_type}</span>}
-                  {pac.allergies       && <span className="card-pac-chip card-pac-chip--alerta"><AlertTriangle size={12} style={{ marginRight: 6 }} />Alergias</span>}
+        <>
+          {view === 'table' ? (
+            <DataTable
+              columns={[
+                { key: 'name', label: 'Nombre', render: (_v, row) => `${row.first_name} ${row.last_name}` },
+                { key: 'curp', label: 'CURP' },
+                { key: 'birth_date', label: 'Edad', render: (_v, row) => calcEdad(row.birth_date) },
+                { key: 'gender', label: 'Género' },
+                { key: 'city', label: 'Ciudad' },
+                { key: 'phone', label: 'Teléfono' },
+              ]}
+              data={listaFiltrada}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              showSearch={false}
+            />
+          ) : (
+            <div className="hospitales-grid">
+              {listaFiltrada.length === 0 && <p>No hay pacientes que coincidan con la búsqueda.</p>}
+              {listaFiltrada.map((pac) => (
+                <div key={pac.patient_id} className="card-hosp">
+                  <div className="card-hosp-img" style={{
+                    background: 'linear-gradient(135deg,#27ae60,#2ecc71)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3em',
+                  }}>
+                    <User size={48} />
+                    <span className="card-pac-genero">{pac.gender === 'F' ? 'Femenino' : 'Masculino'}</span>
+                  </div>
+                  <div className="card-hosp-info">
+                    <h3>{pac.first_name} {pac.last_name}</h3>
+                    <p className="card-hosp-location">CURP: {pac.curp}</p>
+                    <p className="card-hosp-tipo">
+                      {calcEdad(pac.birth_date)}{pac.blood_type ? ` · Tipo ${pac.blood_type}` : ''}
+                    </p>
+                    <div className="card-pac-datos">
+                      {pac.city            && <span className="card-pac-chip"><MapPin size={12} style={{ marginRight: 6 }} />{pac.city}</span>}
+                      {pac.phone           && <span className="card-pac-chip"><Phone size={12} style={{ marginRight: 6 }} />{pac.phone}</span>}
+                      {pac.insurance_type  && <span className="card-pac-chip"><Shield size={12} style={{ marginRight: 6 }} />{pac.insurance_type}</span>}
+                      {pac.allergies       && <span className="card-pac-chip card-pac-chip--alerta"><AlertTriangle size={12} style={{ marginRight: 6 }} />Alergias</span>}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
 
       {!loading && !error && listaFiltrada.length > 0 && (
@@ -178,17 +258,21 @@ export default function Pacientes() {
         <div className="modal-fila">
           <div className="modal-campo"><label>Nombre(s) <span className="req">*</span></label>
             <input name="first_name" value={form.first_name} onChange={handleChange} placeholder="Ej. Juan" maxLength={80} />
+            <ValidationMessages field="first_name" errors={fieldErrors} />
           </div>
           <div className="modal-campo"><label>Apellido(s) <span className="req">*</span></label>
             <input name="last_name" value={form.last_name} onChange={handleChange} placeholder="Ej. Pérez García" maxLength={80} />
+            <ValidationMessages field="last_name" errors={fieldErrors} />
           </div>
         </div>
         <div className="modal-fila">
           <div className="modal-campo"><label>CURP <span className="req">*</span></label>
             <input name="curp" value={form.curp} onChange={handleChange} placeholder="PEGJ900101HTCRRN01" maxLength={18} style={{ textTransform: 'uppercase' }} />
+            <ValidationMessages field="curp" errors={fieldErrors} />
           </div>
           <div className="modal-campo"><label>Fecha de nacimiento <span className="req">*</span></label>
             <input name="birth_date" type="date" value={form.birth_date} onChange={handleChange} />
+            <ValidationMessages field="birth_date" errors={fieldErrors} />
           </div>
         </div>
         <div className="modal-fila">
@@ -204,6 +288,7 @@ export default function Pacientes() {
                 </label>
               ))}
             </div>
+            <ValidationMessages field="gender" errors={fieldErrors} />
           </div>
           <div className="modal-campo"><label>Tipo de sangre</label>
             <select name="blood_type" value={form.blood_type} onChange={handleChange}>

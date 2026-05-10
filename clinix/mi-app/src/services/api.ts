@@ -126,7 +126,7 @@ export const doctoresService = {
   create: (data: Omit<Doctor, 'doctor_id'>) =>
     request<Doctor>('/doctors', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: number, data: Partial<Doctor>) =>
-    request<Doctor>(`/doctors/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    request<Doctor>(`/doctors/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   delete: (id: number) => request<void>(`/doctors/${id}`, { method: 'DELETE' }),
 };
 
@@ -136,7 +136,7 @@ export const pacientesService = {
   create: (data: Omit<Paciente, 'patient_id' | 'registered_at'>) =>
     request<Paciente>('/patients', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: number, data: Partial<Paciente>) =>
-    request<Paciente>(`/patients/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    request<Paciente>(`/patients/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   delete: (id: number) => request<void>(`/patients/${id}`, { method: 'DELETE' }),
 };
 
@@ -144,6 +144,11 @@ export const hospitalesService = {
   getAll: () => request<Hospital[]>('/hospitals'),
   getPaginated: (p: PaginaParams) => request<Paginated<Hospital>>(`/hospitals${qs(p)}`),
   getById: (id: number) => request<Hospital>(`/hospitals/${id}`),
+  create: (data: Omit<Hospital, 'hospital_id'>) =>
+    request<Hospital>('/hospitals', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id: number, data: Partial<Hospital>) =>
+    request<Hospital>(`/hospitals/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id: number) => request<void>(`/hospitals/${id}`, { method: 'DELETE' }),
 };
 
 export const diagnosticosService = {
@@ -155,6 +160,11 @@ export const diagnosticosService = {
 export const productosService = {
   getPaginated: (p: PaginaParams) => request<Paginated<Producto>>(`/products${qs(p)}`),
   getById: (id: number) => request<Producto>(`/products/${id}`),
+  create: (data: Omit<Producto, 'product_id'>) =>
+    request<Producto>('/products', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id: number, data: Partial<Producto>) =>
+    request<Producto>(`/products/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id: number) => request<void>(`/products/${id}`, { method: 'DELETE' }),
 };
 
 export const transaccionesService = {
@@ -162,6 +172,7 @@ export const transaccionesService = {
   getById: (id: number) => request<Transaccion>(`/transactions/${id}`),
   create: (data: TransaccionNueva) =>
     request<Transaccion>('/transactions', { method: 'POST', body: JSON.stringify(data) }),
+  delete: (id: number) => request<void>(`/transactions/${id}`, { method: 'DELETE' }),
 };
 
 export const sintomasService = {

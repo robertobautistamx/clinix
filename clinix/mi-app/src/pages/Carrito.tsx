@@ -171,11 +171,45 @@ export default function Carrito() {
   // Mostrar modal de mensaje de éxito/error
   useEffect(() => {
     if (mensaje && !comprando) {
-      setModalTitle(esExito(mensaje) ? '¡Éxito!' : 'Aviso');
-      setModalIcon(esExito(mensaje)
-        ? <Check size={40} color="#27ae60" />
-        : <X size={40} color="#e74c3c" />);
-      setModalContent(<p style={{textAlign:'center',fontWeight:600}}>{mensaje}</p>);
+      setModalTitle('');
+      setModalIcon(null);
+      setModalContent(
+        <div style={{ textAlign: 'center', padding: '20px 0 10px 0' }}>
+          <style>{`
+            @keyframes scaleCheck {
+              0% { transform: scale(0); opacity: 0; }
+              50% { transform: scale(1.2); opacity: 1; }
+              100% { transform: scale(1); }
+            }
+            @keyframes fadeInUp {
+              to { opacity: 1; transform: translateY(0); }
+            }
+            .success-anim-icon {
+              animation: scaleCheck 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+              display: inline-flex; align-items: center; justify-content: center;
+              width: 80px; height: 80px; border-radius: 50%;
+              background: #eafaf1; margin-bottom: 20px;
+            }
+            .error-anim-icon {
+              animation: scaleCheck 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+              display: inline-flex; align-items: center; justify-content: center;
+              width: 80px; height: 80px; border-radius: 50%;
+              background: #fdecea; margin-bottom: 20px;
+            }
+            .anim-text {
+              animation: fadeInUp 0.4s ease forwards 0.1s;
+              opacity: 0; transform: translateY(10px);
+            }
+          `}</style>
+          <div className={esExito(mensaje) ? "success-anim-icon" : "error-anim-icon"}>
+            {esExito(mensaje) ? <Check size={48} color="#27ae60" strokeWidth={3} /> : <X size={48} color="#e74c3c" strokeWidth={3} />}
+          </div>
+          <h3 className="anim-text" style={{ fontSize: '1.5em', color: esExito(mensaje) ? '#27ae60' : '#e74c3c', margin: '0 0 12px 0' }}>
+            {esExito(mensaje) ? '¡Compra Exitosa!' : 'Atención'}
+          </h3>
+          <p className="anim-text" style={{ fontSize: '1.1em', color: '#1a2e40', margin: 0 }}>{mensaje}</p>
+        </div>
+      );
       setModalOpen(true);
     }
   }, [mensaje, comprando]);
